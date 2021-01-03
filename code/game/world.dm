@@ -77,6 +77,9 @@
 	diary << "[log_end]\n[log_end]\nStarting up. (ID: [game_id]) [time2text(world.timeofday, "hh:mm.ss")][log_end]\n---------------------[log_end]"
 	changelog_hash = md5('html/changelog.html')					//used for telling if the changelog has changed recently
 
+	TgsNew(null, TGS_SECURITY_TRUSTED)
+	TgsInitializationComplete()
+
 	if(byond_version < RECOMMENDED_VERSION)
 		world.log << "Your server's byond version does not meet the recommended requirements for this server. Please update BYOND"
 
@@ -95,6 +98,8 @@
 	//end-emergency fix
 
 	. = ..()
+
+	TgsInitializationComplete()
 
 #ifdef UNIT_TEST
 	log_unit_test("Unit Tests Enabled. This will destroy the world when testing is complete.")
@@ -127,6 +132,7 @@ var/world_topic_spam_protect_ip = "0.0.0.0"
 var/world_topic_spam_protect_time = world.timeofday
 
 /world/Topic(T, addr, master, key)
+	TGS_TOPIC
 	diary << "TOPIC: \"[T]\", from:[addr], master:[master], key:[key][log_end]"
 
 	if (T == "ping")
@@ -474,6 +480,7 @@ var/world_topic_spam_protect_time = world.timeofday
 
 		*/
 
+	TgsReboot()
 	processScheduler.stop()
 
 	if(config.server)	//if you set a server location in config.txt, it sends you there instead of trying to reconnect to the same world address. -- NeoFite
