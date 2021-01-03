@@ -88,6 +88,10 @@
 	if(!procname)
 		clear()
 		return
+	
+	if(!target.CanProcCall(procname)) 
+		clear()
+		return //CanCallProc protect datum.
 
 	if(hastarget)
 		if(!target)
