@@ -197,9 +197,6 @@ proc/load_unit_test_changes()
 		qdel(test)
 
 		CHECK_TICK
-	
-	processScheduler.stop()
-	world.FinishTestRun()
 
 #ifdef UNIT_TEST
 

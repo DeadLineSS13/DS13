@@ -181,8 +181,6 @@ var/global/datum/controller/gameticker/ticker
 		if (config.debug_verbs)
 			for(var/client/C in GLOB.clients)
 				C.enable_debug_verbs(TRUE)
-		if (config.unit_tests_auto)
-			RunUnitTests()
 
 	spawn(0)//Forking here so we dont have to wait for this to finish
 		mode.post_setup()
@@ -204,7 +202,17 @@ var/global/datum/controller/gameticker/ticker
 
 	if(config.sql_enabled)
 		statistic_cycle() // Polls population totals regularly and stores them in an SQL DB -- TLE
-
+	
+	if (config.unit_tests_auto)
+		var/list/fail_reasons
+		if(GLOB.total_runtimes != 0)
+			fail_reasons = list("Total runtimes: [GLOB.total_runtimes]")
+		if(!fail_reasons)
+			text2file("Success!", "[GLOB.log_directory]/clean_run.lk")
+		else
+			log_world("Test run failed!\n[fail_reasons.Join("\n")]")
+		sleep(0)
+		qdel(world) //stop server
 	return TRUE
 
 /datum/controller/gameticker
