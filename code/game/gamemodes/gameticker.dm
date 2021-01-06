@@ -181,6 +181,8 @@ var/global/datum/controller/gameticker/ticker
 		if (config.debug_verbs)
 			for(var/client/C in GLOB.clients)
 				C.enable_debug_verbs(TRUE)
+		if (config.unit_tests_auto)
+			RunUnitTests()
 
 	spawn(0)//Forking here so we dont have to wait for this to finish
 		mode.post_setup()

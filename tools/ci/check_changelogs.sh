@@ -1,5 +1,5 @@
 #!/bin/bash
 set -euo pipefail
 
-md5sum -c - <<< "b9a10c9ad689d9d06df2bfb0e56be951 *html/changelogs/example.yml"
+md5sum -c - <<< "b8d005a2be0bf58137ac46726d443365 *html/changelogs/example.yml"
 python3 tools/GenerateChangelog/ss13_genchangelog.py html/changelog.html html/changelogs

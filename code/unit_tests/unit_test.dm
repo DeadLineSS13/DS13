@@ -27,6 +27,9 @@
 
 #define MAX_UNIT_TEST_RUN_TIME 2 MINUTES
 
+GLOBAL_DATUM(current_test, /datum/unit_test)
+GLOBAL_VAR_INIT(failed_any_test, FALSE)
+
 var/all_unit_tests_passed = 1
 var/failed_unit_tests = 0
 var/skipped_unit_tests = 0
@@ -176,6 +179,27 @@ proc/load_unit_test_changes()
 			sleep(20)
 	unit_test_final_message()
 
+/proc/RunUnitTests()
+	CHECK_TICK
+
+	for(var/I in subtypesof(/datum/unit_test))
+		var/datum/unit_test/test = new I
+
+		GLOB.current_test = test
+		var/duration = REALTIMEOFDAY
+
+		test.start_test()
+
+		duration = REALTIMEOFDAY - duration
+		GLOB.current_test = null
+		GLOB.failed_any_test |= test.reported
+
+		qdel(test)
+
+		CHECK_TICK
+	
+	processScheduler.stop()
+	world.FinishTestRun()
 
 #ifdef UNIT_TEST
 

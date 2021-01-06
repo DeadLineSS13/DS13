@@ -220,6 +220,7 @@ var/list/gamemode_cache = list()
 
 	var/max_gear_cost = 10 // Used in chargen for accessory loadout limit. 0 disables loadout, negative allows infinite points.
 
+	var/unit_tests_auto = FALSE
 	//Debugging Config Options
 //-------------------------
 	var/auto_start = FALSE
@@ -273,6 +274,8 @@ var/list/gamemode_cache = list()
 
 		if(type == "config")
 			switch (name)
+				if("unit_tests")
+					config.unit_tests_auto = TRUE
 				//Debug configs
 				//-------------------------
 				if ("auto_start")
