@@ -56,7 +56,6 @@ var/global/datum/controller/gameticker/ticker
 		to_world("<b>Trying to start [master_mode]...</b>")
 		if (config.auto_start || config.unit_tests_auto)
 			start_ASAP = TRUE
-                        log_world(«Test»)
 		else
 			to_world("<B><FONT color='blue'>Welcome to the pre-game lobby!</FONT></B>")
 			to_world("Please, setup your character and select ready. Game will start in [pregame_timeleft] seconds")
@@ -205,13 +204,7 @@ var/global/datum/controller/gameticker/ticker
 		statistic_cycle() // Polls population totals regularly and stores them in an SQL DB -- TLE
 	
 	if (config.unit_tests_auto)
-		var/list/fail_reasons
-		if(GLOB.total_runtimes != 0)
-			fail_reasons = list("Total runtimes: [GLOB.total_runtimes]")
-		if(!fail_reasons)
-			text2file("Success!", "[GLOB.log_directory]/clean_run.lk")
-		else
-			log_world("Test run failed!\n[fail_reasons.Join("\n")]")
+		text2file("Success!", "[GLOB.log_directory]/clean_run.lk")
 		sleep(0)
 		qdel(world) //stop server
 	return TRUE
