@@ -75,7 +75,6 @@ var/list/gamemode_cache = list()
 	var/cult_ghostwriter_req_cultists = 10 //...so long as this many cultists are active.
 
 	var/character_slots = 10				// The number of available character slots
-	var/loadout_slots = 3					// The number of loadout slots per character
 
 	var/max_maint_drones = 5				//This many drones can spawn,
 	var/allow_drone_spawn = TRUE				//assuming the admin allow them to.
@@ -221,6 +220,7 @@ var/list/gamemode_cache = list()
 
 	var/max_gear_cost = 10 // Used in chargen for accessory loadout limit. 0 disables loadout, negative allows infinite points.
 
+	var/unit_tests_auto = FALSE
 	//Debugging Config Options
 //-------------------------
 	var/auto_start = FALSE
@@ -274,6 +274,8 @@ var/list/gamemode_cache = list()
 
 		if(type == "config")
 			switch (name)
+				if("unit_tests")
+					config.unit_tests_auto = TRUE
 				//Debug configs
 				//-------------------------
 				if ("auto_start")
@@ -665,9 +667,6 @@ var/list/gamemode_cache = list()
 
 				if("character_slots")
 					config.character_slots = text2num(value)
-
-				if("loadout_slots")
-					config.loadout_slots = text2num(value)
 
 				if("allow_drone_spawn")
 					config.allow_drone_spawn = text2num(value)

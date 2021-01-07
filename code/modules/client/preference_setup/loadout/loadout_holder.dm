@@ -1,23 +1,16 @@
 /*
 	/datum/extension/loadout is a datum which acts as an umbrella to handle all the things a human will wear just before spawning in.
-
 	It is typically stored on a mob after it is created, where it can be populated with more data before it is applied.
 	Typically, it will be deleted after applying to a mob spawned into the world
-
 	Loadout holders are not serialized. They are created at runtime to hold gear loaded from disk
-
 	It is comprised of two main components:
 	1. Outfit. Typically taken from the assigned job, a baseline outfit is retrieved and copied into here. It must be copied
 	because it will be edited
-
 	2. Gear datums, IE the usual loadout stuff.
-
 	Before anything is put onto the player, these two types of things are gathered and mixed, they work out their differences.
 	Typically, gear datums take precedence, and may disable or displace parts of the outfit
-
 	This datum also validates the gear, making sure the user isn't trying to take two rigs, two pairs of shoes, or
 	patron items when they're not a patron
-
 	After the mixing is done, then the whole loadout is equipped onto the player in this order:,
 		1. modified-outfit
 		2. gear datums
@@ -161,7 +154,6 @@
 /*
 	Sets the human this outfit will be applied to, allowing us to get more accurate job outfits.
 	This is not an inherent property since loadouts are first created in abstract, in the character setup screen, and only later applied to a mob
-
 */
 /datum/extension/loadout/proc/set_human(var/mob/living/carbon/human/newhuman)
 	if (H == newhuman)
@@ -301,7 +293,7 @@
 /*
 	Actually equip the loadout, after all setup
 */
-/datum/extension/loadout/proc/equip_to_mob()
+/datum/extension/loadout/proc/equip_to_mob(var/dummy = FALSE)
 
 	//Some additional preparation, lets divide the gear into two lists based on whether or not they have any job/role restrictions. This is critical
 	var/list/unrestricted_gear = list()
@@ -320,16 +312,16 @@
 	//Right lets start equipping
 
 	//First of all, we equip the base of the outfit
-	outfit.equip_base(H, equip_adjustments, TRUE)
+	outfit.equip_base(H, equip_adjustments, TRUE, dummy = dummy)
 
 
 	//Secondly, we'll equip our unrestricted gear items
 	for(var/datum/gear/G in unrestricted_gear)
-		equip_gear(G, FALSE)
+		equip_gear(G, FALSE, dummy = dummy)
 
 
 	//Thirdly, we'll equip the ID, this may change our access, hence why we cut the gear list in two
-	var/obj/item/weapon/card/id/W = outfit.equip_id(H, rank, assignment, equip_adjustments)
+	var/obj/item/weapon/card/id/W = outfit.equip_id(H, rank, assignment, equip_adjustments, dummy = dummy)
 	if(W)
 		rank = W.rank
 		assignment = W.assignment
@@ -337,17 +329,17 @@
 
 	//Fourthly, we equip any restricted gear
 	for(var/datum/gear/G in restricted_gear)
-		equip_gear(G)
+		equip_gear(G, dummy = dummy)
 
 
 	//Fifth, the PDA if applicable
-	outfit.equip_pda(H, rank, assignment, equip_adjustments)
+	outfit.equip_pda(H, rank, assignment, equip_adjustments, dummy = dummy)
 
 
 	//Sixth, stored items
 	outfit.equip_stored(H, equip_adjustments)
 	for(var/datum/gear/G in spawn_in_storage)
-		G.spawn_in_storage_or_drop(H, prefs.Gear()[G.display_name])
+		G.spawn_in_storage_or_drop(H, prefs.Gear()[G.display_name], dummy = dummy)
 
 	//Seventh: Some finishing touches
 	if(!(OUTFIT_ADJUSTMENT_SKIP_POST_EQUIP & equip_adjustments))
@@ -362,12 +354,13 @@
 
 
 
-/datum/extension/loadout/proc/equip_gear(var/datum/gear/G, var/check_job = TRUE)
+/datum/extension/loadout/proc/equip_gear(var/datum/gear/G, var/check_job = TRUE, var/dummy = FALSE)
 	if (check_job && !G.job_permitted(H, job))
 		to_chat(H, "<span class='warning'>Your current species, job, branch or whitelist status does not permit you to spawn with [G]!</span>")
 		return
 
 	//Gear doesnt claim a slot, or its slot is taken by another gear, into storage it goes
+	//This will be spawned in a later step, not right now
 	if(!G.slot || G.slot == slot_tie || (G.slot in loadout_taken_slots))
 		spawn_in_storage.Add(G)
 		return
@@ -378,7 +371,7 @@
 		return	//This cannot fail so no need for checks
 
 	//Normal spawning into a mob's equipment slots
-	else if (!G.spawn_on_mob(H, G.get_metadata(prefs)))
+	else if (!G.spawn_on_mob(H, G.get_metadata(prefs), dummy = dummy))
 		//If that fails, it goes into storage
 		spawn_in_storage.Add(G)
 		return
@@ -396,14 +389,12 @@
 
 
 	/*
-	for(var/index = 1 to config.loadout_slots)
+	for(var/index = 1 to LOADOUT_SLOTS)
 		var/list/gears = pref.gear_list[index]
-
 		if(istype(gears))
 			for(var/gear_name in gears)
 				if(!(gear_name in gear_datums))
 					gears -= gear_name
-
 			var/total_cost = 0
 			for(var/gear_name in gears)
 				if(!gear_datums[gear_name])
@@ -412,12 +403,10 @@
 					gears -= gear_name
 				else
 					var/datum/gear/G = gear_datums[gear_name]
-
 					//If patron status is needed, check that we have it
 					if (P && G.patron_only && !P.patron)
 						gears -= gear_name
 						continue
-
 					if(total_cost + G.cost > config.max_gear_cost)
 						gears -= gear_name
 					else
