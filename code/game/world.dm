@@ -96,11 +96,6 @@
 
 	. = ..()
 
-#ifdef UNIT_TEST
-	log_unit_test("Unit Tests Enabled. This will destroy the world when testing is complete.")
-	load_unit_test_changes()
-#endif
-
 	// Set up roundstart seed list.
 	plant_controller = new()
 
@@ -122,6 +117,7 @@
 	Master.Initialize(10, FALSE)
 
 #undef RECOMMENDED_VERSION
+	
 
 var/world_topic_spam_protect_ip = "0.0.0.0"
 var/world_topic_spam_protect_time = world.timeofday
@@ -467,6 +463,24 @@ var/world_topic_spam_protect_time = world.timeofday
 
 		return GLOB.prometheus_metrics.collect()
 
+/world/proc/FinishTestRun()
+	set waitfor = FALSE
+	var/list/fail_reasons
+	if(GLOB)
+		if(GLOB.total_runtimes != 0)
+			fail_reasons = list("Total runtimes: [GLOB.total_runtimes]")
+		if(GLOB.failed_any_test)
+			LAZYADD(fail_reasons, "Unit Tests failed!")
+		if(!GLOB.log_directory)
+			LAZYADD(fail_reasons, "Missing GLOB.log_directory!")
+	else
+		fail_reasons = list("Missing GLOB!")
+	if(!fail_reasons)
+		text2file("Success!", "[GLOB.log_directory]/clean_run.lk")
+	else
+		log_world("Test run failed!\n[fail_reasons.Join("\n")]")
+	sleep(0)	//yes, 0, this'll let Reboot finish and prevent byond memes
+	qdel(src)	//shut it down
 
 /world/Reboot(var/reason)
 	/*spawn(0)

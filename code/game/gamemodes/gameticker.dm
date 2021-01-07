@@ -53,6 +53,13 @@ var/global/datum/controller/gameticker/ticker
 			else
 				master_mode = "extended"
 
+	
+		if (config.unit_tests_auto)
+			text2file("Success!", "[GLOB.log_directory]/clean_run.lk")
+			sleep(0)
+			qdel(world) //stop server
+			return
+
 		to_world("<b>Trying to start [master_mode]...</b>")
 		if (config.auto_start)
 			start_ASAP = TRUE
@@ -202,7 +209,6 @@ var/global/datum/controller/gameticker/ticker
 
 	if(config.sql_enabled)
 		statistic_cycle() // Polls population totals regularly and stores them in an SQL DB -- TLE
-
 	return TRUE
 
 /datum/controller/gameticker
