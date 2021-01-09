@@ -1,3 +1,9 @@
+#define RESTART_COUNTER_PATH "data/round_counter.txt"
+
+
+
+GLOBAL_VAR(restart_counter)
+
 /var/server_name = "Baystation 12"
 
 /var/game_id = null
@@ -123,8 +129,10 @@
 	processScheduler.setup()
 	Master.Initialize(10, FALSE, TRUE)
 
+	GLOB.timezoneOffset = text2num(time2text(0,"hh")) * 36000
+
 #undef RECOMMENDED_VERSION
-	
+
 
 var/world_topic_spam_protect_ip = "0.0.0.0"
 var/world_topic_spam_protect_time = world.timeofday
@@ -471,33 +479,53 @@ var/world_topic_spam_protect_time = world.timeofday
 
 		return GLOB.prometheus_metrics.collect()
 
-/world/proc/FinishTestRun()
-	set waitfor = FALSE
-	var/list/fail_reasons
-	if(GLOB)
-		if(GLOB.total_runtimes != 0)
-			fail_reasons = list("Total runtimes: [GLOB.total_runtimes]")
-		if(GLOB.failed_any_test)
-			LAZYADD(fail_reasons, "Unit Tests failed!")
-		if(!GLOB.log_directory)
-			LAZYADD(fail_reasons, "Missing GLOB.log_directory!")
-	else
-		fail_reasons = list("Missing GLOB!")
-	if(!fail_reasons)
-		text2file("Success!", "[GLOB.log_directory]/clean_run.lk")
-	else
-		log_world("Test run failed!\n[fail_reasons.Join("\n")]")
-	sleep(0)	//yes, 0, this'll let Reboot finish and prevent byond memes
-	qdel(src)	//shut it down
-
-/world/Reboot(var/reason)
+/world/Reboot(reason, ping)
 	/*spawn(0)
 		sound_to(world, sound(pick('sound/AI/newroundsexy.ogg','sound/misc/apcdestroyed.ogg','sound/misc/bangindonk.ogg')))// random end sounds!! - LastyBatsy
 
 		*/
+	if(ping)
+		send2chat("GAME: <@&797602501813469224>", "game") //Don't forget change id channel and id role for you server!!!!!
+		var/list/msg = list()
+
+		if(GLOB.round_id)
+			msg += "Round ID [GLOB.round_id] finished"
+
+		msg += "Next Map: USG Ishumura"
+
+		if(ticker.mode)
+			msg += "Game Mode: [ticker.mode.name]"
+			msg += "Round End State: [ticker.mode.round_finished]"
+
+		if(length(GLOB.clients))
+			msg += "Players: [length(GLOB.clients)]"
+
+		if(length(msg))
+			send2chat("GAME: " + msg.Join(" | "), "game") //TOO!
 
 	TgsReboot()
 	processScheduler.stop()
+
+	if(TgsAvailable())
+		var/do_hard_reboot
+		// check the hard reboot counter
+		var/ruhr = -1
+		switch(ruhr)
+			if(-1)
+				do_hard_reboot = FALSE
+			if(0)
+				do_hard_reboot = TRUE
+			else
+				if(GLOB.restart_counter >= ruhr)
+					do_hard_reboot = TRUE
+				else
+					text2file("[++GLOB.restart_counter]", RESTART_COUNTER_PATH)
+					do_hard_reboot = FALSE
+
+		if(do_hard_reboot)
+			log_world("World rebooted at [time_stamp()]")
+			rustg_log_close_all() // Past this point, no logging procs can be used, at risk of data loss.
+			TgsEndProcess()
 
 	if(config.server)	//if you set a server location in config.txt, it sends you there instead of trying to reconnect to the same world address. -- NeoFite
 		for(var/client/C in GLOB.clients)

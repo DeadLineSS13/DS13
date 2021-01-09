@@ -14,6 +14,7 @@
 	//admin warnings to show approaching evac time
 	var/show_admin_warning_10 = TRUE
 	var/show_admin_warning_5 = TRUE
+	round_end_states = list(MODE_MARKER_N_MAJOR,MODE_MARKER_S_MAJOR,MODE_MARKER_N_MINOR,MODE_MARKER_S_MINOR,MODE_MARKER_DRAW_DEATH,MODE_GENERIC_DRAW_NUKE)
 
 /datum/game_mode/marker/proc/charge_evac_points()
 	deltimer(pointgain_timer) //Recursive function that will slowly tick down the clock until the valour comes to rescue the ishimura's crew.

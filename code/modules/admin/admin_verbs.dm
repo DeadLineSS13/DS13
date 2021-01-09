@@ -152,6 +152,7 @@ var/list/admin_verbs_server = list(
 	/client/proc/Set_Holiday,
 	/datum/admins/proc/startnow,
 	/datum/admins/proc/restart,
+	/datum/admins/proc/end_round,
 	/datum/admins/proc/delay,
 	/datum/admins/proc/toggleaban,
 	/client/proc/toggle_log_hrefs,
@@ -239,6 +240,7 @@ var/list/admin_verbs_rejuv = list(
 	/client/proc/cmd_admin_rejuvenate,
 	/datum/admins/proc/announce,		//priority announce something to all clients.,
 	/datum/admins/proc/restart,
+	/datum/admins/proc/end_round,
 	/datum/admins/proc/delay,
 	/datum/admins/proc/toggleooc,		//toggles ooc on/off for everyone,
 	/datum/admins/proc/toggleaooc,		//toggles aooc on/off for everyone,
@@ -316,6 +318,7 @@ var/list/admin_verbs_hideable = list(
 	/client/proc/Set_Holiday,
 	/datum/admins/proc/startnow,
 	/datum/admins/proc/restart,
+	/datum/admins/proc/end_round,
 	/datum/admins/proc/delay,
 	/datum/admins/proc/toggleaban,
 	/client/proc/toggle_log_hrefs,
@@ -805,18 +808,6 @@ var/list/admin_verbs_mentor = list(
 			verbs |= /client/proc/readmin_self
 	feedback_add_details("admin_verb","DAS") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
-/client/proc/toggle_log_hrefs()
-	set name = "Toggle href logging"
-	set category = "Server"
-	if(!holder)	return
-	if(config)
-		if(config.log_hrefs)
-			config.log_hrefs = 0
-			to_chat(src, "<b>Stopped logging hrefs</b>")
-		else
-			config.log_hrefs = 1
-			to_chat(src, "<b>Started logging hrefs</b>")
-
 /client/proc/check_ai_laws()
 	set name = "Check AI Laws"
 	set category = "Admin"
@@ -1031,34 +1022,6 @@ var/list/admin_verbs_mentor = list(
 			job_master.FreeRole(job)
 			message_admins("A job slot for [job] has been opened by [key_name_admin(usr)]")
 			return
-
-/client/proc/toggleghostwriters()
-	set name = "Toggle ghost writers"
-	set category = "Server"
-	if(!holder)	return
-	if(config)
-		if(config.cult_ghostwriter)
-			config.cult_ghostwriter = 0
-			to_chat(src, "<b>Disallowed ghost writers.</b>")
-			message_admins("Admin [key_name_admin(usr)] has disabled ghost writers.", 1)
-		else
-			config.cult_ghostwriter = 1
-			to_chat(src, "<b>Enabled ghost writers.</b>")
-			message_admins("Admin [key_name_admin(usr)] has enabled ghost writers.", 1)
-
-/client/proc/toggledrones()
-	set name = "Toggle maintenance drones"
-	set category = "Server"
-	if(!holder)	return
-	if(config)
-		if(config.allow_drone_spawn)
-			config.allow_drone_spawn = 0
-			to_chat(src, "<b>Disallowed maint drones.</b>")
-			message_admins("Admin [key_name_admin(usr)] has disabled maint drones.", 1)
-		else
-			config.allow_drone_spawn = 1
-			to_chat(src, "<b>Enabled maint drones.</b>")
-			message_admins("Admin [key_name_admin(usr)] has enabled maint drones.", 1)
 
 /client/proc/man_up(mob/T as mob in SSmobs.mob_list)
 	set category = "Fun"
