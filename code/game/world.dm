@@ -501,7 +501,8 @@ var/world_topic_spam_protect_time = world.timeofday
 			msg += "Players: [length(GLOB.clients)]"
 
 		if(length(msg))
-			send2chat("GAME: " + msg.Join(" | "), "game") //TOO!
+			var/text = "GAME: " + msg.Join(" | ")
+			send2chat(text, "game") //TOO!
 
 	TgsReboot()
 	processScheduler.stop()
