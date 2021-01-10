@@ -102,6 +102,8 @@ GLOBAL_VAR(restart_counter)
 	load_mods()
 	//end-emergency fix
 
+	TgsInitializationComplete()
+
 	. = ..()
 
 #ifdef UNIT_TEST
@@ -127,7 +129,7 @@ GLOBAL_VAR(restart_counter)
 
 	processScheduler.deferSetupFor(/datum/controller/process/ticker)
 	processScheduler.setup()
-	Master.Initialize(10, FALSE, TRUE)
+	Master.Initialize(10, FALSE)
 
 	GLOB.timezoneOffset = text2num(time2text(0,"hh")) * 36000
 
