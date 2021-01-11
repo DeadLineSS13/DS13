@@ -104,6 +104,7 @@
 	// Health and Defense
 	var/total_health = 120                   // Point at which the mob will enter crit.
 	var/healing_factor	=	0.07				//Base damage healed per organ, per tick
+	var/burn_heal_factor = 1				//When healing burns passively, the heal amount is multiplied by this
 	var/max_heal_threshold	=	0.6			//Wounds can only autoheal if the damage is less than this * max_damage
 	var/wound_remnant_time = 10 MINUTES	//How long fully-healed wounds stay visible before vanishing
 	var/limb_health_factor	=	1	//Multiplier on max health of limbs
@@ -1017,7 +1018,6 @@ These procs should return their entire args list. Best just to return parent in 
 
 //Does animations for regenerating a limb
 /datum/species/proc/regenerate_limb(var/mob/living/carbon/human/H, var/limb, var/duration)
-	world << "regenerate limb [duration]"
 	var/regen_icon = get_icobase()
 	var/image/LR = image(regen_icon, H, "[limb]_regen")
 	LR.plane = H.plane

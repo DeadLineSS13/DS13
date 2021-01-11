@@ -14,7 +14,7 @@
 	var/marker_spawnable = TRUE	//Set this to true to allow the marker to spawn this type of necro. Be sure to unset it on the enhanced version unless desired
 	var/preference_settable = TRUE
 	biomass = 80	//This var is defined for all species
-	var/use_total_biomass = FALSE
+	var/require_total_biomass = 0	//If set, this can only be spawned when total biomass is above this value
 	var/biomass_reclamation	=	1	//The marker recovers cost*reclamation
 	var/biomass_reclamation_time	=	8 MINUTES	//How long does it take for all of the reclaimed biomass to return to the marker? This is a pseudo respawn timer
 	var/spawn_method = SPAWN_POINT	//What method of spawning from marker should be used? At a point or manual placement? check _defines/necromorph.dm
@@ -255,6 +255,7 @@
 		var/subtotal = 0
 		if (!E || E.is_stump())
 			//Its not here!
+
 			subtotal = initial_health_values[organ_tag] * dismember_mult
 			blocked += subtotal
 		else
@@ -264,6 +265,7 @@
 			//Is it a torso part?
 			if ((E.organ_tag in BP_TORSO))
 				subtotal *= torso_damage_mult
+
 
 		//And now add to total
 		total += subtotal
