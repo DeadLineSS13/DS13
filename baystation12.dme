@@ -3013,6 +3013,7 @@
 #include "maps\DeadSpace\ishimura_announcements.dm"
 #include "maps\DeadSpace\Ishimura_areas.dm"
 #include "maps\DeadSpace\ishimura_presets.dm"
+#include "maps\DeadSpace\ishumura_elevator.dm"
 #include "maps\DeadSpace\Space_areas.dm"
 #include "maps\DeadSpace\M.01 Ishimura (L).dmm"
 #include "maps\DeadSpace\M.02 Ishimura (M).dmm"

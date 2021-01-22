@@ -845,3 +845,43 @@ area/ishimura/upper/medical/bpc
 	name = "\improper Administrative Shuttle"
 	icon_state = "miscbase"
 	sound_env = LARGE_ENCLOSED
+
+//------------------ Turbolift ------------------//
+
+/area/turbolift
+	icon_state = "shuttle"
+	dynamic_lighting = 1
+
+/area/turbolift/ishumura_top
+	name = "\improper Elevator - First Deck"
+	lift_floor_label = "First Deck"
+	lift_floor_name = ""
+	lift_announce_str = ""
+
+/area/turbolift/ishumura_middle
+	name = "\improper Elevator - Second Deck"
+	lift_floor_label = "Second Deck"
+	lift_floor_name = ""
+	lift_announce_str = ""
+
+/area/turbolift/ishumura_ground
+	name = "\improper Elevator - Third Deck"
+	lift_floor_label = "Third Deck"
+	lift_floor_name = ""
+	lift_announce_str = ""
+	base_turf = /turf/simulated/floor
+
+/area/turbolift/start
+	name = "\improper Elevator - Start"
+
+/area/turbolift/firstdeck
+	name = "\improper first deck"
+	base_turf = /turf/simulated/open
+
+/area/turbolift/seconddeck
+	name = "\improper second deck"
+	base_turf = /turf/simulated/open
+
+/area/turbolift/thirddeck
+	name = "\improper third deck"
+	base_turf = /turf/simulated/open
