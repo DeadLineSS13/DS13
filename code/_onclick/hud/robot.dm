@@ -68,11 +68,11 @@ var/obj/screen/robot_inventory
 	mymob:cells.screen_loc = ui_toxin
 
 //Health
-	mymob.healths = new /obj/screen()
-	mymob.healths.icon = 'icons/mob/screen1_robot.dmi'
-	mymob.healths.icon_state = "health0"
-	mymob.healths.SetName("health")
-	mymob.healths.screen_loc = ui_borg_health
+	healths = new /obj/screen()
+	healths.icon = 'icons/mob/screen1_robot.dmi'
+	healths.icon_state = "health0"
+	healths.SetName("health")
+	healths.screen_loc = ui_borg_health
 
 //Installed Module
 	mymob.hands = new /obj/screen()

@@ -26,18 +26,8 @@
 	hands = null
 	pullin = null
 	purged = null
-	internals = null
-	oxygen = null
 	i_select = null
 	m_select = null
-	toxin = null
-	fire = null
-	bodytemp = null
-	QDEL_NULL(healths)
-	throw_icon = null
-	nutrition_icon = null
-	pressure = null
-	pain = null
 	item_use_icon = null
 	gun_move_icon = null
 	gun_setting_icon = null

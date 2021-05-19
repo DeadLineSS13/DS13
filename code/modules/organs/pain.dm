@@ -1,7 +1,6 @@
-mob/proc/flash_pain(var/target)
-	if(pain)
-		animate(pain, alpha = target, time = 15, easing = ELASTIC_EASING)
-		animate(pain, alpha = 0, time = 20)
+mob/proc/flash_pain()
+	overlay_fullscreen("pain", /obj/screen/fullscreen/pain, 2)
+	clear_fullscreen("pain")
 
 mob/var/last_pain_message
 mob/var/next_pain_time = 0
@@ -22,7 +21,7 @@ mob/living/carbon/proc/custom_pain(var/message, var/power, var/force, var/obj/it
 		else
 			adjustHalLoss(ceil(power/2))
 
-	flash_pain(min(round(2*power)+55, 255))
+	flash_pain()
 
 	// Anti message spam checks
 	if(force || (message != last_pain_message) || (world.time >= next_pain_time))

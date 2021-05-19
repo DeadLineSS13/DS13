@@ -298,3 +298,15 @@
 #define SPAWNPOINT_CRYO	"Cryogenic Storage"
 #define SPAWNPOINT_DORM "Crew Quarters"
 #define SPAWNPOINT_MAINT	"Maintenance Tunnels"
+
+//defins for datum/hud
+
+#define HUD_STYLE_STANDARD	1
+#define HUD_STYLE_REDUCED	2
+#define HUD_STYLE_NOHUD		3
+#define HUD_VERSIONS		3
+
+/////////////////MOVE DEFINES//////////////////////
+#define MOVE_INTENT_DELIBERATE	(0<<0)
+#define MOVE_INTENT_EXERTIVE	(0<<1)
+#define MOVE_INTENT_QUICK		(0<<2)

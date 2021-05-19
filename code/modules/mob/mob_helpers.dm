@@ -610,6 +610,19 @@ proc/is_blind(A)
 		dna.real_name = real_name
 	return 1
 
+/mob/proc/update_sight()
+	//TO DO MAKE THERE RAISE_EVENT
+	sync_lighting_plane_alpha()
+
+
+/mob/proc/sync_lighting_plane_alpha()
+	if(!hud_used)
+		return
+
+	var/obj/screen/plane_master/lighting/L = hud_used.plane_masters["[LIGHTING_PLANE]"]
+	if(L)
+		L.alpha = lighting_alpha
+
 /mob/proc/ssd_check()
 	return !client && !teleop
 

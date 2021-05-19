@@ -29,17 +29,17 @@
 		constructtype = "harvester"
 
 	if(constructtype)
-		mymob.fire = new /obj/screen()
-		mymob.fire.icon = 'icons/mob/screen1_construct.dmi'
-		mymob.fire.icon_state = "fire0"
-		mymob.fire.SetName("fire")
-		mymob.fire.screen_loc = ui_construct_fire
+		fire = new /obj/screen()
+		fire.icon = 'icons/mob/screen1_construct.dmi'
+		fire.icon_state = "fire0"
+		fire.SetName("fire")
+		fire.screen_loc = ui_construct_fire
 
-		mymob.healths = new /obj/screen()
-		mymob.healths.icon = 'icons/mob/screen1_construct.dmi'
-		mymob.healths.icon_state = "[constructtype]_health0"
-		mymob.healths.SetName("health")
-		mymob.healths.screen_loc = ui_construct_health
+		healths = new /obj/screen()
+		healths.icon = 'icons/mob/screen1_construct.dmi'
+		healths.icon_state = "[constructtype]_health0"
+		healths.SetName("health")
+		healths.screen_loc = ui_construct_health
 
 		mymob.pullin = new /obj/screen()
 		mymob.pullin.icon = 'icons/mob/screen1_construct.dmi'
