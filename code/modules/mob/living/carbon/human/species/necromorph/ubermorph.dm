@@ -23,7 +23,6 @@
 	lying_rotation = 90
 	icon_lying = null//Ubermorph doesnt have a lying icon, due to complexity from regen animations
 	pixel_offset_x = -16
-	plane = LARGE_MOB_PLANE
 	layer = LARGE_MOB_LAYER
 
 	unarmed_types = list(/datum/unarmed_attack/claws/ubermorph, /datum/unarmed_attack/bite/strong) //Bite attack is a backup if blades are severed
@@ -277,7 +276,7 @@ Best used near the end, when all seems quiet, to help the necromorphs hunt down 
 			//Find target organ should never fail, we won't bother checking
 			targetstring = "[H]'s [found_organ]"
 
-			playsound(charge., 'sound/weapons/slice.ogg', VOLUME_MAX, 1)
+			playsound(get_turf(H), 'sound/weapons/slice.ogg', VOLUME_MAX, 1)
 			//Handle the external damage
 			ubermorph.launch_strike(L, 30, ubermorph, damage_flags = DAM_SHARP, armor_penetration = 30)//Huge armor penetration to punch through resistance
 
