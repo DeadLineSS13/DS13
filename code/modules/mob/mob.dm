@@ -23,11 +23,6 @@
 	return QDEL_HINT_HARDDEL
 
 /mob/proc/remove_screen_obj_references()
-	hands = null
-	pullin = null
-	purged = null
-	i_select = null
-	m_select = null
 	item_use_icon = null
 	gun_move_icon = null
 	gun_setting_icon = null

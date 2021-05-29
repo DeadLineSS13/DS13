@@ -34,11 +34,6 @@
 
 	var/stat = 0 //Whether a mob is alive or dead. TODO: Move this to living - Nodrak
 
-	var/obj/screen/pullin = null
-	var/obj/screen/purged = null
-	var/obj/screen/i_select = null
-	var/obj/screen/m_select = null
-
 	var/obj/screen/movable/ability_master/ability_master = null
 
 	/*A bunch of this stuff really needs to go under their own defines instead of being globally attached to mob.
