@@ -164,18 +164,12 @@
 		list(CRAFT_TOOL, QUALITY_BOLT_TURNING, 10, 60)
 	)
 
-/datum/craft_recipe/gravigun_ammo
-	name = "Force energy"
-	result = /obj/item/weapon/cell/force
-	flags = CRAFT_ON_SURFACE
-	passive_steps = list(
-	list(CRAFT_PASSIVE, QUALITY_WORKBENCH, 1, 0)
-	)
-	time = 50
+/datum/craft_recipe/brace
+	name = "airlock brace"
+	result = /obj/item/weapon/airlock_brace/directional
 	steps = list(
-	list(CRAFT_MATERIAL, MATERIAL_STEEL, 10),
-	list(CRAFT_STACK, /obj/item/stack/cable_coil, 10),
-	list(CRAFT_STACK, /obj/item/stack/power_node, 1)
+		list(CRAFT_MATERIAL, MATERIAL_STEEL, 20),
+		list(CRAFT_TOOL, QUALITY_WELDING, 10, 60)
 	)
 
 /datum/craft_recipe/cutter_ammo
