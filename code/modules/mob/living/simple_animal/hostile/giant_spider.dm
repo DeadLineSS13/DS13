@@ -350,7 +350,7 @@
 
 /datum/action/innate/spider/comm
 	name = "Command"
-	button_icon_state = "cult_comms"
+	button_icon_state = "command"
 
 /datum/action/innate/spider/comm/IsAvailable()
 	if(!istype(owner, /mob/living/simple_animal/hostile/giant_spider/nurse/midwife))
