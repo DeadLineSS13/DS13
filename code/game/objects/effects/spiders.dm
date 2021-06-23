@@ -71,6 +71,7 @@
 	desc = "They seem to pulse slightly with an inner life."
 	icon_state = "eggs"
 	var/amount_grown = 0
+	var/player_spiders = 0
 
 /obj/effect/spider/eggcluster/Initialize()
 		. = ..()
@@ -92,15 +93,11 @@
 /obj/effect/spider/eggcluster/Process()
 	amount_grown += rand(0,2)
 	if(amount_grown >= 100)
-		var/num = rand(6,24)
-		var/obj/item/organ/external/O = null
-		if(istype(loc, /obj/item/organ/external))
-			O = loc
-
+		var/num = rand(3,12)
 		for(var/i=0, i<num, i++)
-			var/spiderling = new /obj/effect/spider/spiderling(loc, src)
-			if(O)
-				O.implants += spiderling
+			var/obj/effect/spider/spiderling/S = new /obj/effect/spider/spiderling(src.loc)
+			if(player_spiders)
+				S.player_spiders = 1
 		qdel(src)
 
 /obj/effect/spider/spiderling
@@ -112,12 +109,13 @@
 	health = 3
 	var/mob/living/simple_animal/hostile/giant_spider/greater_form
 	var/last_itch = 0
-	var/amount_grown = -1
+	var/amount_grown = 0
+	var/grow_as = null
 	var/obj/machinery/atmospherics/unary/vent_pump/entry_vent
 	var/travelling_in_vent = 0
 	var/dormant = FALSE    // If dormant, does not add the spiderling to the process list unless it's also growing
 	var/growth_chance = 50 // % chance of beginning growth, and eventually become a beautiful death machine
-
+	var/player_spiders = 0
 	var/shift_range = 6
 
 /obj/effect/spider/spiderling/Initialize(var/mapload, var/atom/parent)
@@ -260,8 +258,18 @@
 					break
 
 		if(amount_grown >= 100)
-			new greater_form(src.loc, src)
+			if(!grow_as)
+				grow_as = pick(typesof(/mob/living/simple_animal/hostile/giant_spider))
+			var/mob/living/simple_animal/hostile/giant_spider/S = new grow_as(src.loc)
+			if(player_spiders)
+				var/list/candidates = get_antags(ANTAG_SPIDER)
+				var/client/C = null
+
+				if(candidates.len)
+					C = pick(candidates)
+					S.key = C.key
 			qdel(src)
+
 	else if(isorgan(loc))
 		if(!amount_grown) amount_grown = 1
 		var/obj/item/organ/external/O = loc

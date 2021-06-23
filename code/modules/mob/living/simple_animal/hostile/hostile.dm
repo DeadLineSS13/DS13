@@ -162,7 +162,6 @@
 			walk(src,0)
 			target_mob = null
 
-
 /mob/living/simple_animal/hostile/attackby(var/obj/item/O, var/mob/user)
 	var/oldhealth = health
 	. = ..()

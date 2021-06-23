@@ -199,6 +199,18 @@ I said no!
 	)
 	result = /obj/item/weapon/reagent_containers/food/snacks/sliceable/xenomeatbread
 
+/datum/recipe/spidermeatbread
+	reagents = list("flour" = 15)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/spidermeat,
+		/obj/item/weapon/reagent_containers/food/snacks/spidermeat,
+		/obj/item/weapon/reagent_containers/food/snacks/spidermeat,
+		/obj/item/weapon/reagent_containers/food/snacks/cheesewedge,
+		/obj/item/weapon/reagent_containers/food/snacks/cheesewedge,
+		/obj/item/weapon/reagent_containers/food/snacks/cheesewedge,
+	)
+	result = /obj/item/weapon/reagent_containers/food/snacks/sliceable/spidermeatbread
+
 /datum/recipe/bananabread
 	fruit = list("banana" = 2)
 	reagents = list(/datum/reagent/drink/milk = 5, /datum/reagent/sugar = 5)
@@ -599,6 +611,29 @@ I said no!
 		/obj/item/weapon/reagent_containers/food/snacks/soydope
 	)
 	result = /obj/item/weapon/reagent_containers/food/snacks/stewedsoymeat
+
+/datum/recipe/boiledspiderleg
+	reagents = list("water" = 10)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/spiderleg,
+	)
+	result = /obj/item/weapon/reagent_containers/food/snacks/boiledspiderleg
+
+/datum/recipe/spidereggsham
+	reagents = list("sodiumchloride" = 1)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/spidereggs,
+		/obj/item/weapon/reagent_containers/food/snacks/spidermeat,
+	)
+	result = /obj/item/weapon/reagent_containers/food/snacks/spidereggsham
+
+/datum/recipe/sashimi
+	reagents = list("soysauce" = 5)
+	items = list(
+		/obj/item/weapon/reagent_containers/food/snacks/spidereggs,
+		/obj/item/weapon/reagent_containers/food/snacks/spidermeat,
+	)
+	result = /obj/item/weapon/reagent_containers/food/snacks/sashimi
 
 /datum/recipe/boiledspagetti
 	reagents = list(/datum/reagent/water = 10)

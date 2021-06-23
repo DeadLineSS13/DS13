@@ -1,6 +1,7 @@
 #define ANTAG_SERVANT "servant"
 #define ANTAG_APPRENTICE "apprentice"
 #define ANTAG_WIZARD "Space Wizard"
+#define ANTAG_SPIDER "Spider"
 
 #define FAILED	-1 //When an objective is set to failed, it has entered an unwinnable state and can never be completed
 
