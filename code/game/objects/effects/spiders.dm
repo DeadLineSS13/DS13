@@ -73,6 +73,7 @@
 	var/poison_type = /datum/reagent/toxin
 	var/poison_per_bite = 5
 	var/list/faction = list("spiders")
+	var/directive = "" //Message from the mother
 
 /obj/effect/spider/eggcluster/Initialize()
 		. = ..()
@@ -100,6 +101,7 @@
 			S.poison_type = poison_type
 			S.poison_per_bite = poison_per_bite
 			S.faction = faction.Copy()
+			S.directive = directive
 			if(player_spiders)
 				S.player_spiders = 1
 		qdel(src)
@@ -124,6 +126,7 @@
 	var/poison_per_bite = 5
 	var/list/faction = list("spiders")
 	var/shift_range = 6
+	var/directive = "" //Message from the mother
 
 /obj/effect/spider/spiderling/Initialize(var/mapload, var/atom/parent)
 	greater_form = pick(typesof(/mob/living/simple_animal/hostile/giant_spider))
@@ -290,6 +293,7 @@
 			S.poison_per_bite = poison_per_bite
 			S.poison_type = poison_type
 			S.faction = faction.Copy()
+			S.directive = directive
 			if(player_spiders)
 				var/list/candidates = get_antags(ANTAG_SPIDER)
 				var/client/C = null

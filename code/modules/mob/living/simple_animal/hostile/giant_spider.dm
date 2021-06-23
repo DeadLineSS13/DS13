@@ -39,12 +39,25 @@
 	see_invisible = SEE_INVISIBLE_MINIMUM
 	see_in_dark = 4
 	var/playable_spider = FALSE
+	var/datum/action/innate/spider/lay_web/lay_web
+	var/directive = "" //Message passed down to children, to relay the creator's orders
+
+/mob/living/simple_animal/hostile/giant_spider/nurse/Initialize()
+	. = ..()
+	lay_web = new
+	lay_web.Grant(src)
 
 /mob/living/simple_animal/hostile/giant_spider/Topic(href, href_list)
 	if(href_list["activate"])
 		var/mob/observer = usr
 		if(istype(observer) && playable_spider)
 			humanize_spider(observer)
+
+/mob/living/simple_animal/hostile/giant_spider/Login()
+	..()
+	if(directive)
+		to_chat(src, "<span class='notice'>Your mother left you a directive! Follow it at all costs.</span>")
+		to_chat(src, "<span class='spider'><b>[directive]</b></span>")
 
 /mob/living/simple_animal/hostile/giant_spider/attack_ghost(mob/user)
 	if(!humanize_spider(user))
@@ -78,6 +91,18 @@
 	poison_type = /datum/reagent/soporific
 	var/fed = 0
 	var/static/list/consumed_mobs = list() //the tags of mobs that have been consumed by nurse spiders to lay eggs
+//	var/datum/action/innate/spider/wrap/wrap
+	var/datum/action/innate/spider/lay_eggs/lay_eggs
+	var/datum/action/innate/spider/set_directive/set_directive
+
+/mob/living/simple_animal/hostile/giant_spider/nurse/Initialize()
+	. = ..()
+//	wrap = new
+//	wrap.Grant(src)
+	lay_eggs = new
+	lay_eggs.Grant(src)
+	set_directive = new
+	set_directive.Grant(src)
 
 //hunters have the most poison and move the fastest, so they can find prey
 /mob/living/simple_animal/hostile/giant_spider/hunter
@@ -213,11 +238,11 @@
 				//second, spin a sticky spiderweb on this tile
 				var/obj/effect/spider/stickyweb/W = locate() in get_turf(src)
 				if(!W)
-					Web()
+					lay_web.Trigger()
 				else
 					//third, lay an egg cluster there
 					if(fed)
-						LayEggs()
+						lay_eggs.Trigger()
 					else
 						//fourthly, cocoon any nearby items so those pesky pinkskins can't use them
 						for(var/obj/O in can_see)
@@ -241,105 +266,6 @@
 			busy = SPIDER_IDLE
 			stop_automated_movement = FALSE
 
-/mob/living/simple_animal/hostile/giant_spider/verb/Web()
-	set name = "Lay Web"
-	set category = "Spider"
-	set desc = "Spread a sticky web to slow down prey."
-
-	var/T = src.loc
-
-	if(stat == DEAD)
-		return 0
-	if(busy != SPINNING_WEB)
-		busy = SPINNING_WEB
-		src.visible_message("<span class='notice'>\the [src] begins to secrete a sticky substance.</span>")
-		stop_automated_movement = 1
-		if(do_after(src, 40, target = T))
-			if(busy == SPINNING_WEB && src.loc == T)
-				new /obj/effect/spider/stickyweb(T)
-		busy = SPIDER_IDLE
-		stop_automated_movement = FALSE
-
-
-/mob/living/simple_animal/hostile/giant_spider/nurse/verb/Wrap()
-	set name = "Wrap"
-	set category = "Spider"
-	set desc = "Wrap up prey to feast upon and objects for safe keeping."
-
-	if(stat == DEAD)
-		return 0
-	if(!cocoon_target)
-		var/list/choices = list()
-		for(var/mob/living/L in view(1,src))
-			if(L == src || L.anchored)
-				continue
-			if(istype(L, /mob/living/simple_animal/hostile/giant_spider))
-				continue
-			if(Adjacent(L))
-				choices += L
-		for(var/obj/O in src.loc)
-			if(O.anchored)
-				continue
-			if(Adjacent(O))
-				choices += O
-		var/temp_input = input(src,"What do you wish to cocoon?") in null|choices
-		if(temp_input && !cocoon_target)
-			cocoon_target = temp_input
-
-	if(stat != DEAD && cocoon_target && Adjacent(cocoon_target) && !cocoon_target.anchored)
-		if(busy == SPINNING_COCOON)
-			return //we're already doing this, don't cancel out or anything
-		busy = SPINNING_COCOON
-		visible_message("<span class='notice'>\the [src] begins to secrete a sticky substance around \the [cocoon_target].</span>")
-		stop_automated_movement = TRUE
-		walk(src,0)
-		if(do_after(src, 50, target = cocoon_target))
-			if(busy == SPINNING_COCOON)
-				var/obj/effect/spider/cocoon/C = new(cocoon_target.loc)
-				if(isliving(cocoon_target))
-					var/mob/living/L = cocoon_target
-					if(L.stat != DEAD || !consumed_mobs[L.tag]) //if they're not dead, you can consume them anyway
-						consumed_mobs[L.tag] = TRUE
-						fed++
-						visible_message("<span class='danger'>\the [src] sticks a proboscis into \the [L] and sucks a viscous substance out.</span>")
-						L.death() //you just ate them, they're dead.
-					else
-						to_chat(src, "<span class='warning'>[L] cannot sate your hunger!</span>")
-				cocoon_target.forceMove(C)
-
-				if(cocoon_target.density || ismob(cocoon_target))
-					C.icon_state = pick("cocoon_large1","cocoon_large2","cocoon_large3")
-	cocoon_target = null
-	busy = SPIDER_IDLE
-	stop_automated_movement = FALSE
-
-/mob/living/simple_animal/hostile/giant_spider/nurse/verb/LayEggs()
-	set name = "Lay Eggs"
-	set category = "Spider"
-	set desc = "Lay a clutch of eggs, but you must wrap a creature for feeding first."
-
-	var/obj/effect/spider/eggcluster/E = locate() in get_turf(src)
-	if(stat == DEAD)
-		return 0
-	if(E)
-		to_chat(src, "<span class='warning'>There is already a cluster of eggs here!</span>")
-	else if(!fed)
-		to_chat(src, "<span class='warning'>You are too hungry to do this!</span>")
-	else if(busy != LAYING_EGGS)
-		busy = LAYING_EGGS
-		src.visible_message("<span class='notice'>\the [src] begins to lay a cluster of eggs.</span>")
-		stop_automated_movement = 1
-		if(do_after(src, 50, target = src))
-			if(busy == LAYING_EGGS)
-				E = locate() in get_turf(src)
-				if(!E)
-					var/obj/effect/spider/eggcluster/C = new /obj/effect/spider/eggcluster(src.loc)
-					if(ckey)
-						C.player_spiders = 1
-					fed--
-		busy = SPIDER_IDLE
-		stop_automated_movement = FALSE
-
 /mob/living/simple_animal/hostile/giant_spider/Login()
 	. = ..()
 	GLOB.spidermobs[src] = TRUE
@@ -348,8 +274,101 @@
 	GLOB.spidermobs -= src
 	return ..()
 
+/datum/action/innate/spider
+	background_icon_state = "bg_alien"
+	check_flags = AB_CHECK_ALIVE
+
+/datum/action/innate/spider/lay_web
+	name = "Spin a web to slow down potential prey."
+	button_icon_state = "lay_web"
+
+/datum/action/innate/spider/lay_web/Trigger()
+	if(!istype(owner, /mob/living/simple_animal/hostile/giant_spider/nurse))
+		return
+	var/mob/living/simple_animal/hostile/giant_spider/nurse/S = owner
+
+	if(!isturf(S.loc))
+		return
+	var/turf/T = get_turf(S)
+
+	var/obj/effect/spider/stickyweb/W = locate() in T
+	if(W)
+		to_chat(S, "<span class='warning'>There's already a web here!</span>")
+		return
+
+	if(S.busy != SPINNING_WEB)
+		S.busy = SPINNING_WEB
+		S.visible_message("<span class='notice'>[S] begins to secrete a sticky substance.</span>","<span class='notice'>You begin to lay a web.</span>")
+		S.stop_automated_movement = TRUE
+		if(do_after(S, 40, target = T))
+			if(S.busy == SPINNING_WEB && S.loc == T)
+				new /obj/effect/spider/stickyweb(T)
+		S.busy = SPIDER_IDLE
+		S.stop_automated_movement = FALSE
+	else
+		to_chat(S, "<span class='warning'>You're already spinning a web!</span>")
+
+///datum/action/innate/spider/wrap
+//	name = "Wrap something or someone in a cocoon. If it's a living being, you'll also consume them, allowing you to lay eggs."
+//	button_icon_state = "wrap_0"
+
+
+
+/datum/action/innate/spider/lay_eggs
+	name = "Lay a cluster of eggs, which will soon grow into more spiders. You must wrap a living being to do this."
+	button_icon_state = "lay_eggs"
+
+/datum/action/innate/spider/lay_eggs/IsAvailable()
+	if(..())
+		if(!istype(owner, /mob/living/simple_animal/hostile/giant_spider/nurse))
+			return 0
+		var/mob/living/simple_animal/hostile/giant_spider/nurse/S = owner
+		if(S.fed)
+			return 1
+		return 0
+
+/datum/action/innate/spider/lay_eggs/Trigger()
+	if(!istype(owner, /mob/living/simple_animal/hostile/giant_spider/nurse))
+		return
+	var/mob/living/simple_animal/hostile/giant_spider/nurse/S = owner
+
+	var/obj/effect/spider/eggcluster/E = locate() in get_turf(S)
+	if(E)
+		to_chat(S, "<span class='warning'>There is already a cluster of eggs here!</span>")
+	else if(!S.fed)
+		to_chat(S, "<span class='warning'>You are too hungry to do this!</span>")
+	else if(S.busy != LAYING_EGGS)
+		S.busy = LAYING_EGGS
+		S.visible_message("<span class='notice'>[S] begins to lay a cluster of eggs.</span>","<span class='notice'>You begin to lay a cluster of eggs.</span>")
+		S.stop_automated_movement = TRUE
+		if(do_after(S, 50, target = get_turf(S)))
+			if(S.busy == LAYING_EGGS)
+				E = locate() in get_turf(S)
+				if(!E || !isturf(S.loc))
+					var/obj/effect/spider/eggcluster/C = new /obj/effect/spider/eggcluster(get_turf(S))
+					if(S.ckey)
+						C.player_spiders = TRUE
+					C.directive = S.directive
+					C.poison_type = S.poison_type
+					C.poison_per_bite = S.poison_per_bite
+					C.faction = S.faction
+					S.fed--
+		S.busy = SPIDER_IDLE
+		S.stop_automated_movement = FALSE
+
+/datum/action/innate/spider/set_directive
+	name = "Set a directive for your children to follow."
+	button_icon_state = "directive"
+
+/datum/action/innate/spider/set_directive/Trigger()
+	if(!istype(owner, /mob/living/simple_animal/hostile/giant_spider/nurse))
+		return
+	var/mob/living/simple_animal/hostile/giant_spider/nurse/S = owner
+	S.directive = input(S, "Enter the new directive", "Create directive", "")
+	to_chat(S, S.directive)
+
 /datum/action/innate/spider/comm
-	name = "Command"
+	name = "Send a command to all living spiders."
 	button_icon_state = "command"
 
 /datum/action/innate/spider/comm/IsAvailable()
@@ -358,7 +377,7 @@
 	return TRUE
 
 /datum/action/innate/spider/comm/Trigger()
-	var/input = input(usr, "Input a message for your legions to follow.", "Command", "")
+	var/input = input(usr, "Input a message for your legions.", "Command", "")
 	if(QDELETED(src) || !input || !IsAvailable())
 		return FALSE
 	spider_command(usr, input)
