@@ -392,7 +392,8 @@ default behaviour is:
 	//Breaking out of a locker?
 	if( src.loc && (istype(src.loc, /obj/structure/closet)) )
 		var/obj/structure/closet/C = loc
-		spawn() C.mob_breakout(src)
+		spawn()
+		C.mob_breakout(src)
 		return TRUE
 
 /mob/living/proc/escape_inventory(obj/item/weapon/holder/H)

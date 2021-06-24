@@ -94,6 +94,10 @@
 		if(other.seed == src.seed && !QDELETED(other))
 			blocked = 1
 			break
+	for(var/obj/effect/spider/stickyweb/web in floor.contents)
+		if(!QDELETED(web))
+			blocked = TRUE
+			break
 	if(blocked)
 		return FALSE
 

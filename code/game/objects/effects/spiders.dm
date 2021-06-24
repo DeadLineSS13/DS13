@@ -7,6 +7,26 @@
 	density = FALSE
 	health = 15
 
+/obj/effect/spider/Crossed(atom/movable/O)
+	if(isliving(O))
+		var/mob/living/carbon/L = O
+		if(!has_extension(L, /datum/extension/web_effect) && L.stat != DEAD)
+			set_extension(L, /datum/extension/web_effect)
+
+/datum/extension/web_effect
+	name = "Web Effect"
+	expected_type = /mob/living
+	flags = EXTENSION_FLAG_IMMEDIATE
+	var/speed_factor = 1
+	var/slowdown = 0.60	//Movespeed Penalty
+
+/datum/extension/corruption_effect/New(var/datum/holder)
+	.=..()
+	var/mob/living/carbon/L = holder
+	if(istype(L, /mob/living/carbon))
+		to_chat(L, SPAN_DANGER("Web slows you down."))
+		speed_factor = slowdown	//humans are slowed down
+
 //similar to weeds, but only barfed out by nurses manually
 /obj/effect/spider/ex_act(severity, target)
 	switch(severity)
@@ -54,15 +74,17 @@
 			icon_state = "stickyweb2"
 
 /obj/effect/spider/stickyweb/CanPass(atom/movable/mover, turf/target)
+	. = ..()
 	if(istype(mover, /mob/living/simple_animal/hostile/giant_spider))
-		return 1
+		return TRUE
 	else if(isliving(mover))
+		if(istype(mover.pulledby, /mob/living/simple_animal/hostile/giant_spider))
+			return TRUE
 		if(prob(50))
 			to_chat(mover, "<span class='warning'>You get stuck in \the [src] for a moment.</span>")
-			return 0
+			return FALSE
 	else if(istype(mover, /obj/item/projectile))
 		return prob(30)
-	return 1
 
 /obj/effect/spider/eggcluster
 	name = "egg cluster"
@@ -70,9 +92,7 @@
 	icon_state = "eggs"
 	var/amount_grown = 0
 	var/player_spiders = 0
-	var/poison_type = /datum/reagent/toxin
-	var/poison_per_bite = 5
-	var/list/faction = list("spiders")
+	var/faction = "spiders"
 	var/directive = "" //Message from the mother
 
 /obj/effect/spider/eggcluster/Initialize()
@@ -95,16 +115,14 @@
 /obj/effect/spider/eggcluster/Process()
 	amount_grown += rand(0,2)
 	if(amount_grown >= 100)
-		var/num = rand(3,12)
+		var/num = rand(3,7)
 		for(var/i=0, i<num, i++)
 			var/obj/effect/spider/spiderling/S = new /obj/effect/spider/spiderling(src.loc)
-			S.poison_type = poison_type
-			S.poison_per_bite = poison_per_bite
-			S.faction = faction.Copy()
 			S.directive = directive
+			S.faction = faction
 			if(player_spiders)
 				S.player_spiders = 1
-		qdel(src)
+		QDEL_NULL(src)
 
 /obj/effect/spider/spiderling
 	name = "spiderling"
@@ -124,13 +142,12 @@
 	var/player_spiders = 0
 	var/poison_type = /datum/reagent/toxin
 	var/poison_per_bite = 5
-	var/list/faction = list("spiders")
+	var/faction = "spiders"
 	var/shift_range = 6
 	var/directive = "" //Message from the mother
 
 /obj/effect/spider/spiderling/Initialize(var/mapload, var/atom/parent)
 	greater_form = pick(typesof(/mob/living/simple_animal/hostile/giant_spider))
-	icon_state = initial(greater_form.icon_state)
 	pixel_x = rand(-shift_range, shift_range)
 	pixel_y = rand(-shift_range, shift_range)
 
@@ -193,7 +210,7 @@
 
 /obj/effect/spider/spiderling/Bump(atom/user)
 	if(istype(user, /obj/structure/table))
-		src.loc = user.loc
+		forceMove(user.loc)
 	else
 		..()
 
@@ -228,16 +245,21 @@
 					entry_vent = null
 					return
 				var/obj/machinery/atmospherics/unary/vent_pump/exit_vent = pick(vents)
-				/*if(prob(50))
-					src.visible_message("<B>[src] scrambles into the ventillation ducts!</B>")*/
+				if(prob(50))
+					src.visible_message("<B>[src] scrambles into the ventilation ducts!</B>")
 
 				spawn(rand(20,60))
-					loc = exit_vent
+				if(!exit_vent || exit_vent.welded)
+					forceMove(entry_vent)
+					entry_vent = null
+					return
+
+					forceMove(exit_vent)
 					var/travel_time = round(get_dist(loc, exit_vent.loc) / 2)
 					spawn(travel_time)
 
 						if(!exit_vent || exit_vent.welded)
-							loc = entry_vent
+							forceMove(entry_vent)
 							entry_vent = null
 							return
 
@@ -246,10 +268,10 @@
 						sleep(travel_time)
 
 						if(!exit_vent || exit_vent.welded)
-							loc = entry_vent
+							forceMove(entry_vent)
 							entry_vent = null
 							return
-						loc = exit_vent.loc
+						forceMove(exit_vent.loc)
 						entry_vent = null
 						var/area/new_area = get_area(loc)
 						if(new_area)
@@ -290,10 +312,8 @@
 				else
 					grow_as = pick(/mob/living/simple_animal/hostile/giant_spider, /mob/living/simple_animal/hostile/giant_spider/hunter, /mob/living/simple_animal/hostile/giant_spider/nurse)
 			var/mob/living/simple_animal/hostile/giant_spider/S = new grow_as(src.loc)
-			S.poison_per_bite = poison_per_bite
-			S.poison_type = poison_type
-			S.faction = faction.Copy()
 			S.directive = directive
+			S.faction = faction
 			if(player_spiders)
 				var/list/candidates = get_antags(ANTAG_SPIDER)
 				var/client/C = null
@@ -340,7 +360,7 @@
 	icon_state = "cocoon1"
 	health = 60
 
-	New()
+/obj/effect/spider/cocoon/New()
 		icon_state = pick("cocoon1","cocoon2","cocoon3")
 
 /obj/effect/spider/cocoon/Destroy()
