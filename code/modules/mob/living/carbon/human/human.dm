@@ -4,7 +4,6 @@
 	voice_name = "unknown"
 	icon = 'icons/mob/human.dmi'
 	icon_state = "body_m_s"
-	faction = "humans"
 
 	var/list/hud_list[10]
 	var/list/implants	//Things that are embedded in any of our organs. Nulled out when empty
