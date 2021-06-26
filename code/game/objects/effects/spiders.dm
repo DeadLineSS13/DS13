@@ -7,71 +7,13 @@
 	density = FALSE
 	health = 15
 
-/obj/effect/spider/Crossed(atom/movable/O)
-	if(isliving(O))
-		var/mob/living/carbon/L = O
-		if(!has_extension(L, /datum/extension/web_effect) && L.stat != DEAD)
-			set_extension(L, /datum/extension/web_effect)
-
-/datum/extension/web_effect
-	name = "Web Effect"
-	expected_type = /mob/living
-	flags = EXTENSION_FLAG_IMMEDIATE
-	var/speed_factor = 1
-	var/slowdown = 0.60	//Movespeed Penalty
-
-/datum/extension/corruption_effect/New(var/datum/holder)
-	.=..()
-	var/mob/living/carbon/L = holder
-	if(istype(L, /mob/living/carbon))
-		to_chat(L, SPAN_DANGER("Web slows you down."))
-		speed_factor = slowdown	//humans are slowed down
-
-//similar to weeds, but only barfed out by nurses manually
-/obj/effect/spider/ex_act(severity, target)
-	switch(severity)
-		if(1)
-			qdel(src)
-		if(2)
-			if (prob(50))
-				qdel(src)
-		if(3)
-			if (prob(5))
-				qdel(src)
-
-/obj/effect/spider/attackby(var/obj/item/weapon/W, var/mob/user)
-	user.set_click_cooldown(DEFAULT_ATTACK_COOLDOWN)
-
-	if(W.attack_verb.len)
-		visible_message("<span class='danger'>[user] has [pick(W.attack_verb)] \the [src] with \the [W]!</span>")
-	else
-		visible_message("<span class='danger'>[user] has attacked \the [src] with \the [W]!</span>")
-
-	var/damage = W.force / 4
-
-
-	health -= damage
-	healthcheck()
-
-/obj/effect/spider/bullet_act(var/obj/item/projectile/Proj)
-	..()
-	health -= Proj.get_structure_damage()
-	healthcheck()
-
-/obj/effect/spider/proc/healthcheck()
-	if(health <= 0)
-		qdel(src)
-
-/obj/effect/spider/fire_act(var/datum/gas_mixture/air, var/exposed_temperature, var/exposed_volume, var/multiplier = 1)
-	if(exposed_temperature > 300 + T0C)
-		health -= 5
-		healthcheck()
-
 /obj/effect/spider/stickyweb
 	icon_state = "stickyweb1"
-	New()
-		if(prob(50))
-			icon_state = "stickyweb2"
+
+/obj/effect/spider/stickyweb/Initialize()
+	if(prob(50))
+		icon_state = "stickyweb2"
+	. = ..()
 
 /obj/effect/spider/stickyweb/CanPass(atom/movable/mover, turf/target)
 	. = ..()
@@ -81,19 +23,28 @@
 		if(istype(mover.pulledby, /mob/living/simple_animal/hostile/giant_spider))
 			return TRUE
 		if(prob(50))
-			to_chat(mover, "<span class='warning'>You get stuck in \the [src] for a moment.</span>")
+			to_chat(mover, "<span class='danger'>You get stuck in \the [src] for a moment.</span>")
 			return FALSE
-	else if(istype(mover, /obj/item/projectile))
+	else if(istype(mover, /obj/effect/projectile))
 		return prob(30)
+
+/obj/effect/spider/proc/healthcheck()
+	if(health <= 0)
+		QDEL_NULL(src)
 
 /obj/effect/spider/eggcluster
 	name = "egg cluster"
 	desc = "They seem to pulse slightly with an inner life."
 	icon_state = "eggs"
 	var/amount_grown = 0
-	var/player_spiders = 0
 	var/faction = "spiders"
 	var/directive = "" //Message from the mother
+	///Whether or not a ghost can use the cluster to become a spider.
+	var/ghost_ready = FALSE
+	///The types of spiders the egg sac could produce.
+	var/list/mob/living/potentialspawns = list(/mob/living/simple_animal/hostile/giant_spider,
+								/mob/living/simple_animal/hostile/giant_spider/hunter,
+								/mob/living/simple_animal/hostile/giant_spider/nurse)
 
 /obj/effect/spider/eggcluster/Initialize()
 		. = ..()
@@ -114,15 +65,33 @@
 
 /obj/effect/spider/eggcluster/Process()
 	amount_grown += rand(0,2)
-	if(amount_grown >= 100)
-		var/num = rand(3,7)
-		for(var/i=0, i<num, i++)
-			var/obj/effect/spider/spiderling/S = new /obj/effect/spider/spiderling(src.loc)
-			S.directive = directive
-			S.faction = faction
-			if(player_spiders)
-				S.player_spiders = 1
-		QDEL_NULL(src)
+	if(amount_grown >= 100 && !ghost_ready)
+		for(var/mob/observer/O in GLOB.ghost_mob_list)
+			to_chat(O, "[src] is ready to hatch at [src.x], [src.y], [src.z]!")
+		ghost_ready = TRUE
+
+/obj/effect/spider/eggcluster/attack_ghost(mob/user)
+	. = ..()
+	if(ghost_ready)
+		make_spider(user)
+
+/obj/effect/spider/eggcluster/proc/make_spider(mob/user)
+	var/chosen_spider = input(user, "Which australian are you?", "Choose your spider") as null|anything in potentialspawns
+	if(QDELETED(src) || QDELETED(user) || !chosen_spider)
+		return FALSE
+	var/mob/living/simple_animal/hostile/giant_spider/new_spider = new chosen_spider(src.loc)
+	new_spider.faction = faction
+	new_spider.directive = directive
+	new_spider.key = user.key
+	QDEL_NULL(src)
+	return TRUE
+
+/obj/effect/spider/eggcluster/enriched
+	name = "enriched egg cluster"
+	color = rgb(148,0,211)
+	potentialspawns = list(/mob/living/simple_animal/hostile/giant_spider/tarantula,
+							/mob/living/simple_animal/hostile/giant_spider/viper,
+							/mob/living/simple_animal/hostile/giant_spider/midwife)
 
 /obj/effect/spider/spiderling
 	name = "spiderling"
@@ -139,9 +108,6 @@
 	var/travelling_in_vent = 0
 	var/dormant = FALSE    // If dormant, does not add the spiderling to the process list unless it's also growing
 	var/growth_chance = 50 // % chance of beginning growth, and eventually become a beautiful death machine
-	var/player_spiders = 0
-	var/poison_type = /datum/reagent/toxin
-	var/poison_per_bite = 5
 	var/faction = "spiders"
 	var/shift_range = 6
 	var/directive = "" //Message from the mother
@@ -200,10 +166,10 @@
 	grow_as = /mob/living/simple_animal/hostile/giant_spider/nurse
 
 /obj/effect/spider/spiderling/midwife
-	grow_as = /mob/living/simple_animal/hostile/giant_spider/nurse/midwife
+	grow_as = /mob/living/simple_animal/hostile/giant_spider/midwife
 
 /obj/effect/spider/spiderling/viper
-	grow_as = /mob/living/simple_animal/hostile/giant_spider/hunter/viper
+	grow_as = /mob/living/simple_animal/hostile/giant_spider/viper
 
 /obj/effect/spider/spiderling/tarantula
 	grow_as = /mob/living/simple_animal/hostile/giant_spider/tarantula
@@ -306,22 +272,13 @@
 
 		if(amount_grown >= 100)
 			if(!grow_as)
-				grow_as = pick(/mob/living/simple_animal/hostile/giant_spider, /mob/living/simple_animal/hostile/giant_spider/hunter, /mob/living/simple_animal/hostile/giant_spider/nurse)
 				if(prob(3))
-					grow_as = pick(/mob/living/simple_animal/hostile/giant_spider/tarantula, /mob/living/simple_animal/hostile/giant_spider/hunter/viper, /mob/living/simple_animal/hostile/giant_spider/nurse/midwife)
+					grow_as = pick(/mob/living/simple_animal/hostile/giant_spider/tarantula, /mob/living/simple_animal/hostile/giant_spider/viper, /mob/living/simple_animal/hostile/giant_spider/midwife)
 				else
 					grow_as = pick(/mob/living/simple_animal/hostile/giant_spider, /mob/living/simple_animal/hostile/giant_spider/hunter, /mob/living/simple_animal/hostile/giant_spider/nurse)
 			var/mob/living/simple_animal/hostile/giant_spider/S = new grow_as(src.loc)
 			S.directive = directive
 			S.faction = faction
-			if(player_spiders)
-				var/list/candidates = get_antags(ANTAG_SPIDER)
-				var/client/C = null
-				S.playable_spider = TRUE
-
-				if(candidates.len)
-					C = pick(candidates)
-					S.key = C.key
 			qdel(src)
 
 	else if(isorgan(loc))

@@ -13,7 +13,6 @@
 
 /datum/action
 	var/name = "Generic Action"
-	var/desc = null
 	var/action_type = AB_ITEM
 	var/procname = null
 	var/atom/movable/target = null
