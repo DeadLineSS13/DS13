@@ -22,8 +22,8 @@
 	var/turf/simulated/open/O = GetAbove(src)
 	var/atom/climb_target
 	if(istype(O))
-		for(var/turf/T in trange(1,O))
-			if(!isopenspace(T) && T.is_floor())
+		for(var/turf/T in RANGE_TURFS(O, 1))
+			if(T.is_hole && T.is_floor())
 				climb_target = T
 			else
 				for(var/obj/I in T)
@@ -191,7 +191,7 @@
 	if(anchored)
 		return FALSE
 
-	if((locate(/obj/structure/disposalpipe/up) in below) || locate(/obj/machinery/atmospherics/pipe/zpipe/up) in below)
+	if((locate(/obj/structure/disposalpipe/up) in below) || (locate(/obj/machinery/atmospherics/pipe/zpipe/up) in below))
 		return FALSE
 
 /mob/living/carbon/human/can_fall(anchor_bypass = FALSE, turf/location_override = loc)
